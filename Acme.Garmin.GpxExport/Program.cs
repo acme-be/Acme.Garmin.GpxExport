@@ -15,7 +15,7 @@ namespace Acme.Garmin.GpxExport
 
     internal class Program
     {
-        private const int ActivitiesCount = 50;
+        private const int ActivitiesCount = 500;
         private const int WaitTime = 5000;
         private const int MaxRetries = 5;
 
@@ -58,9 +58,14 @@ namespace Acme.Garmin.GpxExport
                         try
                         {
                             Log($"Activity {activityId} : Downloading details (attempt {i + 1} on {MaxRetries})");
-                            exporter.DownloadGpx(activityId, activityDate);
-                            exporter.DownloadJson(activityId, activityDate, activity);
-                            Thread.Sleep(WaitTime);
+                            var requestExecuted = exporter.DownloadGpx(activityId, activityDate);
+                            requestExecuted = requestExecuted | exporter.DownloadJson(activityId, activityDate, activity);
+
+                            if (requestExecuted)
+                            {
+                                Thread.Sleep(WaitTime);
+                            }
+
                             break;
                         }
                         catch (WebException ex)
@@ -69,9 +74,6 @@ namespace Acme.Garmin.GpxExport
                             Thread.Sleep(WaitTime);
                         }
                     }
-
-
-                    Thread.Sleep(WaitTime);
                 }
             }
             while (activities.Count > 0);

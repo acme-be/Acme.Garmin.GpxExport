@@ -37,13 +37,13 @@ namespace Acme.Garmin.GpxExport
         /// </summary>
         /// <param name="activityId">The id of the activity.</param>
         /// <param name="activityDate">The date for the activity.</param>
-        public void DownloadGpx(long activityId, DateTime activityDate)
+        public bool DownloadGpx(long activityId, DateTime activityDate)
         {
             var output = new FileInfo(Path.Combine(this.baseDirectory.FullName, $"{activityDate:yyyy-MM-dd-HH-mm}-{activityId}.gpx"));
 
             if (output.Exists)
             {
-                return;
+                return false;
             }
 
             var url = Urls.Gpx(activityId);
@@ -52,20 +52,24 @@ namespace Acme.Garmin.GpxExport
             File.WriteAllText(output.FullName, data);
 
             output.CreationTimeUtc = output.LastWriteTimeUtc = activityDate;
+
+            return true;
         }
 
-        public void DownloadJson(in long activityId, in DateTime activityDate, JToken activity)
+        public bool DownloadJson(in long activityId, in DateTime activityDate, JToken activity)
         {
             var output = new FileInfo(Path.Combine(this.baseDirectory.FullName, $"{activityDate:yyyy-MM-dd-HH-mm}-{activityId}.json"));
 
             if (output.Exists)
             {
-                return;
+                return false;
             }
 
             File.WriteAllText(output.FullName, activity.ToString());
 
             output.CreationTimeUtc = output.LastWriteTimeUtc = activityDate;
+
+            return true;
         }
 
         public JArray GetActivities(int limit, int start)
