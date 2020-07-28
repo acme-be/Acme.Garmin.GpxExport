@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acme.Garmin.GpxExport", "Acme.Garmin.GpxExport\Acme.Garmin.GpxExport.csproj", "{8EEA502A-75E1-4F2F-8014-E0B33A8C4552}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8EEA502A-75E1-4F2F-8014-E0B33A8C4552}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EEA502A-75E1-4F2F-8014-E0B33A8C4552}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EEA502A-75E1-4F2F-8014-E0B33A8C4552}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EEA502A-75E1-4F2F-8014-E0B33A8C4552}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
