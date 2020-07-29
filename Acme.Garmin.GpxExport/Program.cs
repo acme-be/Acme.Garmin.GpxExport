@@ -16,10 +16,16 @@ namespace Acme.Garmin.GpxExport
     internal class Program
     {
         private const int ActivitiesCount = 500;
-        private const int WaitTime = 5000;
         private const int MaxRetries = 5;
+        private const int RetryWaitTime = 5000;
+        private const int WaitTime = 5000;
 
-        private static void Main(string[] args)
+        private static void Log(string content)
+        {
+            Console.WriteLine($"{DateTime.Now} - {content}");
+        }
+
+        private static void Main()
         {
             var baseDirectory = new FileInfo(typeof(Program).Assembly.Location).Directory;
 
@@ -32,7 +38,6 @@ namespace Acme.Garmin.GpxExport
 
             Console.Write("Enter the session id : ");
 
-
             var sessionId = Console.ReadLine();
             var exporter = new GpxExporter(sessionId, baseDirectory);
 
@@ -41,9 +46,9 @@ namespace Acme.Garmin.GpxExport
             JArray activities;
             do
             {
-                Log($"Fetch next {ActivitiesCount} activities");
-                activities = exporter.GetActivities(ActivitiesCount, start);
-                Log($"{activities.Count} activities fetched !");
+                var nextIndex = start;
+                activities = RetryIfError($"Fetch next {ActivitiesCount} activities", () => exporter.GetActivities(ActivitiesCount, nextIndex));
+
                 Thread.Sleep(WaitTime);
 
                 start = start + activities.Count;
@@ -53,35 +58,42 @@ namespace Acme.Garmin.GpxExport
                     var activityId = (long)activity["activityId"];
                     var activityDate = DateTime.ParseExact((string)activity["startTimeGMT"] ?? throw new ArgumentNullException(), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 
-                    for (var i = 0; i < MaxRetries; i++)
+                    var shouldSleep = RetryIfError($"Activity {activityId} : Downloading details", () =>
                     {
-                        try
-                        {
-                            Log($"Activity {activityId} : Downloading details (attempt {i + 1} on {MaxRetries})");
-                            var requestExecuted = exporter.DownloadGpx(activityId, activityDate);
-                            requestExecuted = requestExecuted | exporter.DownloadJson(activityId, activityDate, activity);
+                        var requestExecuted = exporter.DownloadGpx(activityId, activityDate);
+                        requestExecuted = requestExecuted | exporter.DownloadJson(activityId, activityDate, activity);
+                        return requestExecuted;
+                    });
 
-                            if (requestExecuted)
-                            {
-                                Thread.Sleep(WaitTime);
-                            }
-
-                            break;
-                        }
-                        catch (WebException ex)
-                        {
-                            Log($"Activity {activityId} : Error : {ex.Message}");
-                            Thread.Sleep(WaitTime);
-                        }
+                    if (shouldSleep)
+                    {
+                        Thread.Sleep(WaitTime);
                     }
+
+                    break;
                 }
-            }
-            while (activities.Count > 0);
+            } while (activities.Count > 0);
         }
 
-        private static void Log(string content)
+        private static T RetryIfError<T>(string callReference, Func<T> call)
         {
-            Console.WriteLine($"{DateTime.Now} - {content}");
+            for (var i = 0; i < MaxRetries; i++)
+            {
+                try
+                {
+                    Log($"{callReference} - (attempt {i + 1} on {MaxRetries})");
+                    var value = call();
+                    Log($"{callReference} - Success");
+                    return value;
+                }
+                catch (WebException ex)
+                {
+                    Log($"{callReference} - Error : {ex.Message}");
+                    Thread.Sleep(RetryWaitTime);
+                }
+            }
+
+            throw new ApplicationException($"The max number of retries has been reached for {callReference}");
         }
     }
 }
