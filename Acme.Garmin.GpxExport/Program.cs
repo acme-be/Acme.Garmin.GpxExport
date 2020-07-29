@@ -69,8 +69,6 @@ namespace Acme.Garmin.GpxExport
                     {
                         Thread.Sleep(WaitTime);
                     }
-
-                    break;
                 }
             } while (activities.Count > 0);
         }
