@@ -16,8 +16,8 @@ namespace Acme.Garmin.GpxExport
     internal class Program
     {
         private const int ActivitiesCount = 500;
-        private const int MaxRetries = 5;
-        private const int RetryWaitTime = 5000;
+        private const int MaxRetries = 10;
+        private const int RetryWaitTime = 10000;
         private const int WaitTime = 5000;
 
         private static void Log(string content)
