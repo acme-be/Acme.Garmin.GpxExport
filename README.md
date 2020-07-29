@@ -11,4 +11,3 @@ Small .Net Core tool to download all activities and gpx in Garmin.
 
 ## Known issues
 - Sometimes the download return a (403) Forbidden for the sessionId, the application try 5 times, because it seems to be a temporary error :'(
-    * It seems to be documented at Garmin with "NETWORK_RESPONSE_OUT_OF_MEMORY = -403", it explain why it sometimes works. 
